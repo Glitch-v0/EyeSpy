@@ -5,7 +5,6 @@ const databaseUrl =
     ? process.env.TEST_DATABASE_URL
     : process.env.DATABASE_URL;
 
-console.log({ databaseUrl });
 const prisma = new PrismaClient({
   datasources: {
     db: {
