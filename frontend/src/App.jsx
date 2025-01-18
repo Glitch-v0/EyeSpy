@@ -19,9 +19,9 @@ function App() {
 
   return (
     <>
-      <h1>
+      {/* <h1>
         Click Coordinates: X-{clickCoordinate.x} Y-{clickCoordinate.y}
-      </h1>
+      </h1> */}
       <PictureDisplay />
       <ClickMarker
         coordinates={clickCoordinate}
