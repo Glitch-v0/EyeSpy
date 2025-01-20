@@ -37,7 +37,7 @@ export default function PictureDisplay() {
 
   return (
     <div>
-      <img src={pictureLink} alt={currentPicture} />
+      <img id="picture" src={pictureLink} alt={currentPicture} />
       <ClickMarker />
     </div>
   );
