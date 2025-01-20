@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import photoCalculation from "../photoCalculation.js";
+import ClickMarker from "./ClickMarker.jsx";
 
 export default function PictureDisplay() {
   const [pictureData, setPictureData] = useState([]);
@@ -8,13 +9,7 @@ export default function PictureDisplay() {
     {}
   );
 
-  const screenMeasurements = {
-    width: window.innerWidth,
-    height: window.innerHeight,
-  };
-
-  //Split the current picture url at "upload/" to insert screen height and width
-  //between that and "v173xxxxxx/File_name.jpg"
+  //Insert the adjusted measurements into the picture link
   const pictureLink = `${
     currentPicture.split("upload/")[0] +
     "upload/w_" +
@@ -37,13 +32,13 @@ export default function PictureDisplay() {
         setCurrentPictureMeasurements(
           photoCalculation(data[0].height, data[0].width)
         );
-        console.log(currentPictureMeasurements);
       });
   }, []);
 
   return (
     <div>
       <img src={pictureLink} alt={currentPicture} />
+      <ClickMarker />
     </div>
   );
 }
