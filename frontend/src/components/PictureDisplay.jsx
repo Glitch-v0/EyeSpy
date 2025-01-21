@@ -16,7 +16,7 @@ export default function PictureDisplay() {
     setPictureData({
       display_name: allPictureData[newIndex].display_name.split("_")[0],
       currentIndex: newIndex,
-      originalResoulution: resolution,
+      originalResolution: resolution,
       url: cleanPhotoURL(allPictureData[newIndex].secure_url, resolution),
     });
   }
@@ -30,7 +30,7 @@ export default function PictureDisplay() {
         setPictureData({
           display_name: data[0].display_name.split("_")[0],
           currentIndex: 0,
-          originalResoulution: resolution,
+          originalResolution: resolution,
           url: cleanPhotoURL(data[0].secure_url, resolution),
         });
       });
@@ -39,7 +39,7 @@ export default function PictureDisplay() {
   return (
     <div>
       <img id="picture" src={pictureData.url} alt={pictureData.display_name} />
-      <ClickMarker originalPictureSize={pictureData.originalResoulution} />
+      <ClickMarker originalPictureSize={pictureData.originalResolution} />
     </div>
   );
 }

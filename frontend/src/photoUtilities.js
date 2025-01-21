@@ -2,9 +2,9 @@ export function photoCalculation(height, width) {
   let adjustedHeight, adjustedWidth;
   const aspectRatio = width / height;
 
-  console.log(
-    `Running photoCalculation: with height: ${height}, width: ${width}, and aspect ratio: ${aspectRatio}`
-  );
+  // console.log(
+  //   `Running photoCalculation: with height: ${height}, width: ${width}, and aspect ratio: ${aspectRatio}`
+  // );
 
   if (height > window.innerHeight) {
     //Picture is too tall
@@ -39,6 +39,6 @@ export function cleanPhotoURL(url, resolution) {
   }
     `;
 
-  console.log({ url, resolution, adjustedResolution, pictureLink });
+  // console.log({ url, resolution, adjustedResolution, pictureLink });
   return pictureLink;
 }
