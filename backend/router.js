@@ -12,4 +12,8 @@ router.get("/pictures/:name/:screenDimension", async (req, res) => {
   await controller.getPictureURL(req, res);
 });
 
+router.get("/pictures/:name/guess/:guessCoordinates", async (req, res) => {
+  await controller.checkGuess(req, res);
+});
+
 export default router;

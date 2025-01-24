@@ -2,6 +2,9 @@
   "name": "back-end",
   "version": "1.0.0",
   "main": "index.js",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "scripts": {},
   "type": "module",
   "author": "",
