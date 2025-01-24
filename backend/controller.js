@@ -1,6 +1,8 @@
-import cloudinary from "./cloudinary.js";
+// import cloudinary from "./cloudinary.js";
 import asyncHandler from "express-async-handler";
 import mockapi from "./mockapi.js";
+import { createOrRefreshToken } from "./tokenUtils.js";
+import prisma from "./prisma.js";
 
 const controller = {
   allPictureData: [],
@@ -53,13 +55,24 @@ const controller = {
     if (!controller.pictureNames.length) {
       await controller.loadPictureData();
     }
-    res.json(controller.reducedPictureData);
+
+    //Generate and send JWT
+    const token = createOrRefreshToken(crypto.randomUUID());
+
+    res.json({ pictureData: controller.reducedPictureData, token: token });
   }),
   checkGuess: asyncHandler(async (req, res) => {
-    console.log("Checking guess...");
     // Check if picture list hasn't been loaded
     if (!controller.pictureNames.length) {
       await controller.loadPictureData();
+    }
+
+    //Check if user token is in db
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+    });
+    if (!user) {
+      res.json("User not found");
     }
 
     // Compare guessed coordinates to db coordinates
