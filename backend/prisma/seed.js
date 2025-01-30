@@ -75,17 +75,14 @@ async function main() {
   await prisma.user.createMany({
     data: [
       {
-        id: 1,
         initials: "GUD",
         startTime: new Date(Date.now()),
       },
       {
-        id: 2,
         initials: "LOL",
         startTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
       },
       {
-        id: 3,
         initials: "WIN",
         startTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 15),
       },
@@ -93,20 +90,18 @@ async function main() {
   });
 
   //Create Scores
+  const users = await prisma.user.findMany({
+    where: { initials: { in: ["GUD", "LOL", "WIN"] } },
+    select: { id: true, initials: true },
+  });
+
+  const userMap = Object.fromEntries(users.map((u) => [u.initials, u.id]));
+
   await prisma.score.createMany({
     data: [
-      {
-        userId: 1,
-        score: 100,
-      },
-      {
-        userId: 2,
-        score: 200,
-      },
-      {
-        userId: 3,
-        score: 300,
-      },
+      { userId: userMap["GUD"], score: 100 },
+      { userId: userMap["LOL"], score: 200 },
+      { userId: userMap["WIN"], score: 300 },
     ],
   });
 }

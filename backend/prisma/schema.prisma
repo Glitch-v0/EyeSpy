@@ -23,15 +23,16 @@ model Picture {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  jwt             String    @unique
-  initials        String    @unique
-  startTime       DateTime
-  endTime         DateTime?
-  score           Score?
-  picturesGuessed Picture[]
-  attempts        Int?
-  misses          Int?
+  id                      Int       @id @default(autoincrement())
+  jwt                     String?   @unique
+  initials                String?   @unique
+  startTime               DateTime
+  endTime                 DateTime?
+  score                   Score?
+  picturesGuessed         Picture[]
+  currentGuessCoordinates Json[]
+  attempts                Int?
+  misses                  Int?
 }
 
 model Score {
