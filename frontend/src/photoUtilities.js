@@ -42,3 +42,5 @@ export function cleanPhotoURL(url, resolution) {
   // console.log({ url, resolution, adjustedResolution, pictureLink });
   return pictureLink;
 }
+
+export function checkGuess(coordinates, pictureData) {}

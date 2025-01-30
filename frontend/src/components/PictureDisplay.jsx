@@ -5,6 +5,7 @@ import ClickMarker from "./ClickMarker.jsx";
 export default function PictureDisplay() {
   const [allPictureData, setAllPictureData] = useState([]);
   const [pictureData, setPictureData] = useState({});
+  const [correct, setCorrect] = useState(false);
 
   function nextPicture() {
     const currentIndex = pictureData.currentIndex;
@@ -25,13 +26,17 @@ export default function PictureDisplay() {
     fetch(`${import.meta.env.VITE_API_URL}/pictures`)
       .then((response) => response.json())
       .then((data) => {
-        setAllPictureData(data);
-        const resolution = { width: data[0].width, height: data[0].height };
+        console.log({ data });
+        setAllPictureData(data.pictureData);
+        localStorage.setItem("token", data.token);
+        const firstItem = data.pictureData[0];
+
+        const resolution = { width: firstItem.width, height: firstItem.height };
         setPictureData({
-          display_name: data[0].display_name.split("_")[0],
+          display_name: firstItem.display_name.split("_")[0],
           currentIndex: 0,
           originalResolution: resolution,
-          url: cleanPhotoURL(data[0].secure_url, resolution),
+          url: cleanPhotoURL(firstItem.secure_url, resolution),
         });
       });
   }, []);
