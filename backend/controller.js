@@ -1,7 +1,7 @@
 // import cloudinary from "./cloudinary.js";
 import asyncHandler from "express-async-handler";
 import mockapi from "./mockapi.js";
-import { createOrRefreshToken } from "./tokenUtils.js";
+import { createOrRefreshToken, verifyToken } from "./tokenUtils.js";
 import prisma from "./prisma/prisma.js";
 
 const controller = {
@@ -92,17 +92,60 @@ const controller = {
       await controller.loadPictureData();
     }
 
-    //Get token from header
-    const token = req.headers.authorization.split(" ")[1];
-    console.log({ token });
-    //Check if user token is in db
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-    });
-    if (!user) {
-      res.json("User not found");
+    let token;
+    //Check if token exists
+    if (!req.headers.authorization) {
+      token = createOrRefreshToken(crypto.randomUUID());
+      await prisma.user.create({
+        data: {
+          jwt: token,
+          startTime: new Date(),
+        },
+      });
+    } else {
+      token = req.headers.authorization.split(" ")[1];
+
+      //Verify token
+      try {
+        verifyToken(token);
+      } catch (error) {
+        // Check if token is expired
+        if (error.name === "TokenExpiredError") {
+          //Refresh user token
+          token = createOrRefreshToken(token);
+        } else {
+          return res.json("Invalid token");
+        }
+      }
     }
 
+    console.log({ token });
+    //Check if user token is in db
+    let user = await prisma.user.findUnique({
+      where: { jwt: token },
+    });
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          jwt: token,
+          startTime: new Date(),
+          attempts: 1,
+        },
+      });
+    } else {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          attempts: {
+            increment: 1,
+          },
+        },
+      });
+      console.log(`Attempt: ${user.attempts}`);
+    }
+
+    // Count every attempt
+    console.log({ user });
     // Compare guessed coordinates to db coordinates
     const picture = await prisma.picture.findUnique({
       where: { name: req.params.name },
@@ -145,7 +188,7 @@ const controller = {
       yRange2.push(coordinateCheck.leftEye.br.y, coordinateCheck.leftEye.tl.y);
     }
 
-    console.log({ xRange1, yRange1, xRange2, yRange2 });
+    // console.log({ xRange1, yRange1, xRange2, yRange2 });
 
     // console.log(`Guess: ${req.params.guessCoordinates}`);
     // res.json("Guess: " + req.params.guessCoordinates);

@@ -31,8 +31,8 @@ model User {
   score                   Score?
   picturesGuessed         Picture[]
   currentGuessCoordinates Json[]
-  attempts                Int?
-  misses                  Int?
+  attempts                Int       @default(1)
+  misses                  Int       @default(0)
 }
 
 model Score {
