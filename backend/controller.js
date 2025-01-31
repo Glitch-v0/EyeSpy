@@ -57,32 +57,36 @@ const controller = {
     }
 
     //Check if user has token
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(" ")[1];
-      //Verify token
-      const user = await prisma.user.findUnique({
-        where: { token: token },
-      });
-      if (!user) {
-        console.log("User not in DB!");
-      } else {
-        console.log({ user });
-      }
+    let token = req.headers.authorization.split(" ")[1];
 
-      return res.json({ pictureData: controller.reducedPictureData });
+    //Verify token
+    try {
+      verifyToken(token);
+    } catch (error) {
+      // Check if token is expired
+      if (error.name === "TokenExpiredError") {
+        //Refresh user token
+        const newToken = createOrRefreshToken(crypto.randomUUID());
+        await prisma.user.update({
+          where: { jwt: token },
+          data: {
+            jwt: newToken,
+          },
+        });
+        token = newToken;
+      } else {
+        //Create new token and new user
+        token = createOrRefreshToken(crypto.randomUUID());
+        await prisma.user.create({
+          data: {
+            jwt: token,
+            startTime: new Date(),
+          },
+        });
+      }
     }
 
-    //Generate and send JWT
-    const token = createOrRefreshToken(crypto.randomUUID());
-    // console.log({ token });
-
-    // Create user with token
-    await prisma.user.create({
-      data: {
-        jwt: token,
-        startTime: new Date(),
-      },
-    });
+    console.log(`Token: ${token}`);
 
     res.json({ pictureData: controller.reducedPictureData, token: token });
   }),
@@ -112,9 +116,23 @@ const controller = {
         // Check if token is expired
         if (error.name === "TokenExpiredError") {
           //Refresh user token
-          token = createOrRefreshToken(token);
+          const newToken = createOrRefreshToken(crypto.randomUUID());
+          await prisma.user.update({
+            where: { jwt: token },
+            data: {
+              jwt: newToken,
+            },
+          });
+          token = newToken;
         } else {
-          return res.json("Invalid token");
+          //Create new token and new user
+          token = createOrRefreshToken(crypto.randomUUID());
+          await prisma.user.create({
+            data: {
+              jwt: token,
+              startTime: new Date(),
+            },
+          });
         }
       }
     }
@@ -144,13 +162,11 @@ const controller = {
       console.log(`Attempt: ${user.attempts}`);
     }
 
-    // Count every attempt
-    console.log({ user });
     // Compare guessed coordinates to db coordinates
     const picture = await prisma.picture.findUnique({
       where: { name: req.params.name },
     });
-    // console.log({ picture });
+    console.log({ picture });
     if (!picture) {
       res.json("Picture not found");
     }

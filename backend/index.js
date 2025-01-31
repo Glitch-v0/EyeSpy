@@ -1,6 +1,5 @@
 import express from "express";
 import "dotenv/config";
-import passport from "passport";
 import prisma from "./prisma/prisma.js";
 import session from "express-session";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
@@ -30,10 +29,6 @@ app.use(
     },
   })
 );
-
-// Passport setup
-app.use(passport.initialize());
-app.use(passport.session());
 
 const corsOptions = {
   origins: [process.env.FRONT_ORIGIN],
