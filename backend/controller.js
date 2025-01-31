@@ -36,7 +36,6 @@ const controller = {
     if (!controller.pictureNames.length) {
       await controller.loadPictureData();
     }
-    console.log(controller.allPictureData);
     res.json(controller.pictureNames);
   }),
   getPictureURL: asyncHandler(async (req, res) => {
@@ -85,8 +84,6 @@ const controller = {
         });
       }
     }
-
-    console.log(`Token: ${token}`);
 
     res.json({ pictureData: controller.reducedPictureData, token: token });
   }),
@@ -137,7 +134,6 @@ const controller = {
       }
     }
 
-    console.log({ token });
     //Check if user token is in db
     let user = await prisma.user.findUnique({
       where: { jwt: token },
@@ -166,7 +162,7 @@ const controller = {
     const picture = await prisma.picture.findUnique({
       where: { name: req.params.name },
     });
-    console.log({ picture });
+    console.log({ picture: picture.coordinates });
     if (!picture) {
       res.json("Picture not found");
     }
@@ -204,7 +200,23 @@ const controller = {
       yRange2.push(coordinateCheck.leftEye.br.y, coordinateCheck.leftEye.tl.y);
     }
 
-    // console.log({ xRange1, yRange1, xRange2, yRange2 });
+    console.log({ xRange1, yRange1, xRange2, yRange2 });
+
+    const [userGuessX, userGuessY] = req.params.guessCoordinates
+      .split("_")
+      .map(Number);
+    console.log({ userGuessX, userGuessY });
+
+    if (
+      userGuessX >= Math.min(...xRange1) &&
+      userGuessX <= Math.max(...xRange1) &&
+      userGuessY >= Math.min(...yRange1) &&
+      userGuessY <= Math.max(...yRange1)
+    ) {
+      console.log("Correct!");
+    } else {
+      console.log("Incorrect!");
+    }
 
     // console.log(`Guess: ${req.params.guessCoordinates}`);
     // res.json("Guess: " + req.params.guessCoordinates);
