@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import prisma from "./prisma/prisma.js";
+import prisma from "../prisma/prisma.js";
 
 export function createOrRefreshToken(userId) {
   return jwt.sign({ userId: userId }, process.env.JWT_SECRET, {

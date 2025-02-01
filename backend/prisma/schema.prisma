@@ -18,21 +18,19 @@ model Picture {
   name        String @unique
   url         String @unique
   coordinates Json
-  User        User?  @relation(fields: [userId], references: [id])
-  userId      Int?
 }
 
 model User {
-  id                      Int       @id @default(autoincrement())
-  jwt                     String?   @unique
-  initials                String?   @unique
-  startTime               DateTime
-  endTime                 DateTime?
-  score                   Score?
-  picturesGuessed         Picture[]
-  currentGuessCoordinates Json[]
-  attempts                Int       @default(0)
-  misses                  Int       @default(0)
+  id               Int       @id @default(autoincrement())
+  jwt              String?   @unique
+  initials         String?   @unique
+  startTime        DateTime
+  endTime          DateTime?
+  score            Score?
+  picturesComplete String[]
+  eyesFound        String[]
+  attempts         Int       @default(0)
+  misses           Int       @default(0)
 }
 
 model Score {
