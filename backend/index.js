@@ -35,7 +35,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
-  console.log(`Route called: ${req.method} ${req.originalUrl}`);
+  // console.log(`Route called: ${req.method} ${req.originalUrl}`);
   // console.log(`From origin: ${req.get("origin")}`);
   next();
 });

@@ -1,7 +1,7 @@
 // import cloudinary from "./cloudinary.js";
 import asyncHandler from "express-async-handler";
 import mockapi from "./mockapi.js";
-import { createOrRefreshToken, verifyToken } from "./utilities/tokenUtils.js";
+import { handleUserToken } from "./utilities/tokenUtils.js";
 import prisma from "./prisma/prisma.js";
 import { userFunctions } from "./database/user.js";
 import { coordinateUtils } from "./utilities/coordinateUtils.js";
@@ -58,25 +58,17 @@ const controller = {
     }
 
     //Check if user has token
-    let token = req.headers.authorization.split(" ")[1];
 
-    try {
-      verifyToken(token);
-    } catch (error) {
-      // Check if token is expired
-      if (error.name === "TokenExpiredError") {
-        //Refresh user token
-        const newToken = createOrRefreshToken(crypto.randomUUID());
-        userFunctions.refreshToken(token, newToken);
-        token = newToken;
-      } else {
-        //Create new token and new user
-        token = createOrRefreshToken(crypto.randomUUID());
-        userFunctions.createUser(token);
-      }
-    }
+    const { token, user } = await handleUserToken(
+      req.headers.authorization.split(" ")[1]
+    );
 
-    res.json({ pictureData: controller.reducedPictureData, token: token });
+    console.log(`Sending token: ${token} for user ${user}`);
+
+    res.json({
+      pictureData: controller.reducedPictureData,
+      token: token ? token : null,
+    });
   }),
   checkGuess: asyncHandler(async (req, res) => {
     // Check if picture list hasn't been loaded
@@ -84,36 +76,10 @@ const controller = {
       await controller.loadPictureData();
     }
 
-    let token;
-    //Check if token exists
-    if (!req.headers.authorization) {
-      token = createOrRefreshToken(crypto.randomUUID());
-      userFunctions.createUser(token);
-    } else {
-      token = req.headers.authorization.split(" ")[1];
-
-      try {
-        verifyToken(token);
-      } catch (error) {
-        // Check if token is expired
-        if (error.name === "TokenExpiredError") {
-          //Refresh user token
-          const newToken = createOrRefreshToken(crypto.randomUUID());
-          userFunctions.refreshToken(token, newToken);
-          token = newToken;
-        } else {
-          //Create new token and new user
-          token = createOrRefreshToken(crypto.randomUUID());
-          userFunctions.createUser(token);
-        }
-      }
-    }
-
-    //Check if user token is in db
-    let user = userFunctions.getUserByJwt(token);
-    if (!user) {
-      user = userFunctions.createUser(token);
-    }
+    let { token, user } = await handleUserToken(
+      req.headers.authorization.split(" ")[1]
+    );
+    console.log({ token, user });
 
     // Compare guessed coordinates to db coordinates
     const picture = await prisma.picture.findUnique({
@@ -146,17 +112,14 @@ const controller = {
       )
     ) {
       console.log("Eye 1 is correct!");
-      if (eyeCount === 1) {
-        userFunctions.pictureComplete(token, picture.name);
+      if (eyeCount === 1 || !("eye2" in user.eyesFound)) {
+        await userFunctions.pictureComplete(
+          token,
+          picture.name,
+          user.picturesComplete
+        );
       } else if (eyeCount === 2) {
-        // const eye1Success = prisma.user.update({
-        //   where: { jwt: token },
-        //   data: {
-        //     currentGuessCoordinates: {
-        //       eye1: { userGuessX, userGuessY },
-        //     },
-        //   },
-        // });
+        await userFunctions.eyesFound(token, "eye1");
       }
     } else if (
       coordinateUtils.correctUserAttempt(
@@ -167,13 +130,25 @@ const controller = {
       )
     ) {
       console.log("Eye 2 is correct!");
+      if ("eye1" in user.eyesFound) {
+        await userFunctions.pictureComplete(
+          token,
+          picture.name,
+          user.picturesComplete
+        );
+      } else if (!("eye1" in user.eyesFound)) {
+        await userFunctions.eyesFound(token, "eye2");
+      }
     } else {
-      console.log("Incorrect!");
-      userFunctions.incorrectAttempt(token);
+      console.log(`Incorrect! Passing ${token} into incorrectAttempt`);
+      await userFunctions.incorrectAttempt(token);
     }
 
-    // console.log(`Guess: ${req.params.guessCoordinates}`);
-    // res.json("Guess: " + req.params.guessCoordinates);
+    console.log(`Guess: ${req.params.guessCoordinates}`);
+    res.json({
+      correct: true,
+      token: token ? token : null,
+    });
   }),
 };
 

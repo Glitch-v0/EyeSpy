@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import prisma from "../prisma/prisma.js";
+import { userFunctions } from "../database/user.js";
 
 export function createOrRefreshToken(userId) {
   return jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
@@ -11,8 +11,7 @@ export function verifyToken(token) {
   try {
     jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
-    console.log(error);
-    return error;
+    return error.message;
   }
   return true;
 }
@@ -26,27 +25,31 @@ export function decodeToken(token) {
 
 export async function handleUserToken(token) {
   //Verify token
-  try {
-    verifyToken(token);
-  } catch (error) {
-    // Check if token is expired
-    if (error.name === "TokenExpiredError") {
-      //Refresh user token
-      await prisma.user.update({
-        where: { jwt: token },
-        data: {
-          jwt: createOrRefreshToken(crypto.randomUUID()),
-        },
-      });
-    } else {
+  const verified = verifyToken(token);
+  let user;
+  let sentToken;
+  console.log({ verified, token });
+  if (verified !== true) {
+    // console.log({ verified });
+    if (verified === "jwt malformed") {
       //Create new token and new user
-      token = createOrRefreshToken(crypto.randomUUID());
-      await prisma.user.create({
-        data: {
-          jwt: token,
-          startTime: new Date(),
-        },
-      });
+      console.log("Going malformed route");
+      sentToken = createOrRefreshToken(crypto.randomUUID());
+      user = await userFunctions.createUser(sentToken);
+    } else if (verified === "jwt expired") {
+      console.log("Going expired route");
+      //Refresh user token
+      const newToken = createOrRefreshToken(crypto.randomUUID());
+      user = await userFunctions.refreshToken(token, newToken);
+      sentToken = newToken;
+    } else {
+      console.log("Going other route");
+      //Invalid token
     }
+  } else {
+    //Valid token
+    user = await userFunctions.getUserByJwt(token);
+    sentToken = token;
   }
+  return { token: sentToken, user: user };
 }
