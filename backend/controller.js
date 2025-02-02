@@ -63,7 +63,7 @@ const controller = {
       req.headers.authorization.split(" ")[1]
     );
 
-    console.log(`Sending token: ${token} for user ${user}`);
+    // console.log(`Sending token: ${token} for user ${user}`);
 
     res.json({
       pictureData: controller.reducedPictureData,
@@ -79,7 +79,7 @@ const controller = {
     let { token, user } = await handleUserToken(
       req.headers.authorization.split(" ")[1]
     );
-    console.log({ token, user });
+    // console.log({ token, user });
 
     // Compare guessed coordinates to db coordinates
     const picture = await prisma.picture.findUnique({
@@ -103,6 +103,8 @@ const controller = {
     //Check if coordinates are stored for one or two eyes
     const eyeCount = xRange2.length ? 2 : 1;
     // console.log({ eyeCount });
+
+    let pictureIsFinished = false;
     if (
       coordinateUtils.correctUserAttempt(
         userGuessX,
@@ -118,6 +120,7 @@ const controller = {
           picture.name,
           user.picturesComplete
         );
+        pictureIsFinished = true;
       } else if (eyeCount === 2) {
         await userFunctions.eyesFound(token, "eye1");
       }
@@ -136,17 +139,19 @@ const controller = {
           picture.name,
           user.picturesComplete
         );
+        pictureIsFinished = true;
       } else if (!("eye1" in user.eyesFound)) {
         await userFunctions.eyesFound(token, "eye2");
       }
     } else {
-      console.log(`Incorrect! Passing ${token} into incorrectAttempt`);
+      // console.log(`Incorrect! Passing ${token} into incorrectAttempt`);
       await userFunctions.incorrectAttempt(token);
     }
 
     console.log(`Guess: ${req.params.guessCoordinates}`);
+    console.log({ pictureIsFinished }, picture.name, picture.coordinates);
     res.json({
-      correct: true,
+      finished: pictureIsFinished,
       token: token ? token : null,
     });
   }),

@@ -28,7 +28,7 @@ export async function handleUserToken(token) {
   const verified = verifyToken(token);
   let user;
   let sentToken;
-  console.log({ verified, token });
+  // console.log({ verified, token });
   if (verified !== true) {
     // console.log({ verified });
     if (verified === "jwt malformed") {
