@@ -19,19 +19,19 @@ async function main() {
       {
         name: "Ibex",
         url: "test2",
-        coordinates: { tl: { x: 946, y: 675 }, br: { x: 999, y: 706 } },
+        coordinates: { tl: { x: 732, y: 454 }, br: { x: 786, y: 488 } },
       },
       {
         name: "Frog",
         url: "test3",
         coordinates: {
           rightEye: {
-            tl: { x: 1032, y: 402 },
-            br: { x: 1263, y: 519 },
+            tl: { x: 732, y: 524 },
+            br: { x: 842, y: 678 },
           },
           leftEye: {
-            tl: { x: 488, y: 517 },
-            br: { x: 719, y: 622 },
+            tl: { x: 334, y: 692 },
+            br: { x: 485, y: 810 },
           },
         },
       },
@@ -40,12 +40,12 @@ async function main() {
         url: "test4",
         coordinates: {
           rightEye: {
-            tl: { x: 61, y: 544 },
-            br: { x: 89, y: 288 },
+            tl: { x: 74, y: 363 },
+            br: { x: 105, y: 376 },
           },
           leftEye: {
-            tl: { x: 35, y: 681 },
-            br: { x: 54, y: 708 },
+            tl: { x: 45, y: 449 },
+            br: { x: 79, y: 477 },
           },
         },
       },
@@ -59,12 +59,12 @@ async function main() {
         url: "test6",
         coordinates: {
           rightEye: {
-            tl: { x: 660, y: 249 },
-            br: { x: 688, y: 258 },
+            tl: { x: 1312, y: 499 },
+            br: { x: 1382, y: 518 },
           },
           leftEye: {
-            tl: { x: 629, y: 263 },
-            br: { x: 624, y: 274 },
+            tl: { x: 1256, y: 527 },
+            br: { x: 1288, y: 545 },
           },
         },
       },

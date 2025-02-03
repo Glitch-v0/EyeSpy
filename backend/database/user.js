@@ -50,6 +50,12 @@ export const userFunctions = {
             picturesComplete: {
               push: pictureName,
             },
+            attempts: {
+              increment: 1,
+            },
+            eyesFound: {
+              set: [],
+            },
           },
         });
         console.log({ test });

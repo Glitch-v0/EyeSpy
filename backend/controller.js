@@ -114,7 +114,7 @@ const controller = {
       )
     ) {
       console.log("Eye 1 is correct!");
-      if (eyeCount === 1 || !("eye2" in user.eyesFound)) {
+      if (eyeCount === 1) {
         await userFunctions.pictureComplete(
           token,
           picture.name,
@@ -122,7 +122,16 @@ const controller = {
         );
         pictureIsFinished = true;
       } else if (eyeCount === 2) {
-        await userFunctions.eyesFound(token, "eye1");
+        if (user.eyesFound.includes("eye2")) {
+          await userFunctions.pictureComplete(
+            token,
+            picture.name,
+            user.picturesComplete
+          );
+          pictureIsFinished = true;
+        } else if (!user.eyesFound.includes("eye1")) {
+          await userFunctions.correctAttempt(token, "eye1");
+        }
       }
     } else if (
       coordinateUtils.correctUserAttempt(
@@ -133,23 +142,27 @@ const controller = {
       )
     ) {
       console.log("Eye 2 is correct!");
-      if ("eye1" in user.eyesFound) {
+      console.log(`Checking if eye1 is in eyes found.... ${user.eyesFound}`);
+      if (user.eyesFound.includes("eye1")) {
         await userFunctions.pictureComplete(
           token,
           picture.name,
           user.picturesComplete
         );
         pictureIsFinished = true;
-      } else if (!("eye1" in user.eyesFound)) {
-        await userFunctions.eyesFound(token, "eye2");
+      } else if (
+        !user.eyesFound.includes("eye1") &&
+        !user.eyesFound.includes("eye2")
+      ) {
+        await userFunctions.correctAttempt(token, "eye2");
       }
     } else {
       // console.log(`Incorrect! Passing ${token} into incorrectAttempt`);
       await userFunctions.incorrectAttempt(token);
     }
 
+    console.log({ pictureIsFinished }, picture.coordinates);
     console.log(`Guess: ${req.params.guessCoordinates}`);
-    console.log({ pictureIsFinished }, picture.name, picture.coordinates);
     res.json({
       finished: pictureIsFinished,
       token: token ? token : null,

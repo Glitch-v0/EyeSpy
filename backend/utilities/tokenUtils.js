@@ -45,10 +45,16 @@ export async function handleUserToken(token) {
     } else {
       console.log("Going other route");
       //Invalid token
+      user = createOrRefreshToken(crypto.randomUUID());
+      sentToken = user.jwt;
     }
   } else {
     //Valid token
     user = await userFunctions.getUserByJwt(token);
+    if (!user) {
+      user = await userFunctions.createUser(token);
+      sentToken = user.jwt;
+    }
     sentToken = token;
   }
   return { token: sentToken, user: user };
