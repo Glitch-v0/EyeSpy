@@ -8,12 +8,19 @@ export default function PictureDisplay() {
   const [correct, setCorrect] = useState(false);
 
   function nextPicture() {
-    const currentIndex = pictureData.currentIndex;
-    const newIndex = currentIndex + 1;
-    const resolution = {
+    let currentIndex = pictureData.currentIndex;
+    let newIndex = currentIndex + 1;
+    let resolution = {
       width: allPictureData[newIndex].width,
       height: allPictureData[newIndex].height,
     };
+    // console.log({
+    //   allPictureData,
+    //   currentIndex,
+    //   newIndex,
+    //   resolution,
+    //   display_name: allPictureData[newIndex].display_name.split("_")[0],
+    // });
     setPictureData({
       display_name: allPictureData[newIndex].display_name.split("_")[0],
       currentIndex: newIndex,
@@ -23,12 +30,18 @@ export default function PictureDisplay() {
   }
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/pictures`)
+    fetch(`${import.meta.env.VITE_API_URL}/pictures`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
-        console.log({ data });
+        // console.log(`{Sending token: ${localStorage.getItem("token")}`);
         setAllPictureData(data.pictureData);
-        localStorage.setItem("token", data.token);
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
         const firstItem = data.pictureData[0];
 
         const resolution = { width: firstItem.width, height: firstItem.height };
@@ -44,7 +57,10 @@ export default function PictureDisplay() {
   return (
     <div>
       <img id="picture" src={pictureData.url} alt={pictureData.display_name} />
-      <ClickMarker originalPictureSize={pictureData.originalResolution} />
+      <ClickMarker
+        originalPictureSize={pictureData.originalResolution}
+        nextPicture={nextPicture}
+      />
     </div>
   );
 }

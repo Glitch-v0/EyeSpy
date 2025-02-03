@@ -43,4 +43,20 @@ export function cleanPhotoURL(url, resolution) {
   return pictureLink;
 }
 
-export function checkGuess(coordinates, pictureData) {}
+export function normalizeCoordinates(picture, event, originalPictureSize) {
+  const pictureRect = picture.getBoundingClientRect();
+
+  //X and Y are the picture coordinates, pretending the rest of the screen doesn't exist
+  const pictureX = event.clientX - pictureRect.left;
+  const pictureY = event.clientY - pictureRect.top;
+
+  //Compare X and Y to picture size to get normalized coordinates
+  const xRatio = originalPictureSize.width / pictureRect.width;
+  const yRatio = originalPictureSize.height / pictureRect.height;
+  // console.log({ xRatio, yRatio, originalPictureSize, pictureRect });
+
+  const normalizedX = Math.round(pictureX * xRatio);
+  const normalizedY = Math.round(pictureY * yRatio);
+
+  return [normalizedX, normalizedY, pictureX, pictureY];
+}
