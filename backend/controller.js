@@ -59,7 +59,7 @@ const controller = {
 
     //Check if user has token
 
-    const { token, user } = await handleUserToken(
+    const { token } = await handleUserToken(
       req.headers.authorization.split(" ")[1]
     );
 
@@ -105,6 +105,8 @@ const controller = {
     // console.log({ eyeCount });
 
     let pictureIsFinished = false;
+    let correctAttempt = false;
+    let scoreData = null;
     if (
       coordinateUtils.correctUserAttempt(
         userGuessX,
@@ -113,24 +115,45 @@ const controller = {
         yRange1
       )
     ) {
-      console.log("Eye 1 is correct!");
+      // console.log("Eye 1 is correct!");
       if (eyeCount === 1) {
-        await userFunctions.pictureComplete(
+        // Complete picture if only one eye
+        const allCompletedPictures = await userFunctions.pictureComplete(
           token,
           picture.name,
           user.picturesComplete
         );
-        pictureIsFinished = true;
+        // console.log({ allCompletedPictures });
+        if (
+          allCompletedPictures &&
+          allCompletedPictures.length === controller.pictureNames.length
+        ) {
+          //Check for completing all pictures
+          // console.log("All pictures completed!");
+          scoreData = await userFunctions.allPicturesComplete(token);
+        } else {
+          pictureIsFinished = true;
+        }
       } else if (eyeCount === 2) {
         if (user.eyesFound.includes("eye2")) {
-          await userFunctions.pictureComplete(
+          const allCompletedPictures = await userFunctions.pictureComplete(
             token,
             picture.name,
             user.picturesComplete
           );
-          pictureIsFinished = true;
+          if (
+            allCompletedPictures &&
+            allCompletedPictures.length === controller.pictureNames.length
+          ) {
+            //Check for completing all pictures
+            // console.log("All pictures completed!");
+            scoreData = await userFunctions.allPicturesComplete(token);
+          } else {
+            pictureIsFinished = true;
+          }
         } else if (!user.eyesFound.includes("eye1")) {
           await userFunctions.correctAttempt(token, "eye1");
+          correctAttempt = true;
         }
       }
     } else if (
@@ -141,33 +164,45 @@ const controller = {
         yRange2
       )
     ) {
-      console.log("Eye 2 is correct!");
-      console.log(`Checking if eye1 is in eyes found.... ${user.eyesFound}`);
       if (user.eyesFound.includes("eye1")) {
-        await userFunctions.pictureComplete(
+        const allCompletedPictures = await userFunctions.pictureComplete(
           token,
           picture.name,
           user.picturesComplete
         );
-        pictureIsFinished = true;
+        if (
+          allCompletedPictures &&
+          allCompletedPictures.length === controller.pictureNames.length
+        ) {
+          //Check for completing all pictures
+          // console.log("All pictures completed!");
+          scoreData = await userFunctions.allPicturesComplete(token);
+        } else {
+          pictureIsFinished = true;
+        }
       } else if (
         !user.eyesFound.includes("eye1") &&
         !user.eyesFound.includes("eye2")
       ) {
         await userFunctions.correctAttempt(token, "eye2");
+        correctAttempt = true;
       }
     } else {
-      // console.log(`Incorrect! Passing ${token} into incorrectAttempt`);
+      // console.log(Incorrect! Passing ${token} into incorrectAttempt);
       await userFunctions.incorrectAttempt(token);
     }
 
-    console.log({ pictureIsFinished }, picture.coordinates);
-    console.log(`Guess: ${req.params.guessCoordinates}`);
+    // console.log({ pictureIsFinished, correctAttempt });
+    // console.log(`Guess: ${req.params.guessCoordinates}`);
     res.json({
       finished: pictureIsFinished,
+      correct: correctAttempt,
       token: token ? token : null,
+      scoreData: scoreData ? scoreData : null,
     });
   }),
+
+  getScores: asyncHandler(async (req, res) => {}),
 };
 
 export default controller;

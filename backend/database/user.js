@@ -41,10 +41,10 @@ export const userFunctions = {
   },
 
   pictureComplete: async (token, pictureName, picturesCompleted) => {
-    console.log({ token, pictureName, picturesCompleted });
+    // console.log({ token, pictureName, picturesCompleted });
     if (!picturesCompleted?.includes(pictureName)) {
       try {
-        const test = await prisma.user.update({
+        const user = await prisma.user.update({
           where: { jwt: token },
           data: {
             picturesComplete: {
@@ -57,8 +57,11 @@ export const userFunctions = {
               set: [],
             },
           },
+          select: {
+            picturesComplete: true,
+          },
         });
-        console.log({ test });
+        return user.picturesComplete;
       } catch (error) {
         console.log(error);
       }
@@ -98,6 +101,78 @@ export const userFunctions = {
           },
         },
       });
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  allPicturesComplete: async (token) => {
+    try {
+      let user = await prisma.user.findFirst({
+        where: { jwt: token },
+      });
+      if (!user) {
+        return;
+      }
+      //Calculate score
+      const baseScore = 100000;
+      const accuracy = user.attempts / (user.attempts + user.misses);
+      const duration = Date.now() - user.startTime;
+      const score = (baseScore - duration) * accuracy;
+      console.log({ score });
+
+      user = await prisma.user.update({
+        where: { jwt: token },
+        data: {
+          picturesComplete: [],
+          eyesFound: [],
+          attempts: 0,
+          misses: 0,
+          score: {
+            upsert: {
+              create: {
+                score: score,
+              },
+              update: {
+                score: score,
+              },
+            },
+          },
+        },
+      });
+
+      //Get top 3 scores
+      const topScores = await prisma.user.findMany({
+        orderBy: {
+          score: {
+            score: "desc",
+          },
+        },
+        take: 3,
+        select: {
+          initials: true,
+          score: {
+            select: {
+              score: true,
+            },
+          },
+        },
+      });
+
+      //Get user rank
+      const userRank = await prisma.score.count({
+        where: {
+          score: {
+            gt: user.score,
+          },
+        },
+      });
+
+      return {
+        userScore: user.score,
+        userRank: userRank,
+        topScores: topScores,
+      };
     } catch (error) {
       console.log(error.message);
     }

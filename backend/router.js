@@ -33,4 +33,8 @@ router.get(
   }
 );
 
+router.get("/scores", limiter, async (req, res) => {
+  await controller.getScores(req, res);
+});
+
 export default router;
