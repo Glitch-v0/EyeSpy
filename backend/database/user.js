@@ -107,20 +107,23 @@ export const userFunctions = {
   },
 
   allPicturesComplete: async (token) => {
+    let user;
     try {
-      let user = await prisma.user.findFirst({
+      user = await prisma.user.findFirst({
         where: { jwt: token },
       });
-      if (!user) {
-        return;
-      }
-      //Calculate score
-      const baseScore = 100000;
-      const accuracy = user.attempts / (user.attempts + user.misses);
-      const duration = Date.now() - user.startTime;
-      const score = (baseScore - duration) * accuracy;
-      console.log({ score });
+    } catch (error) {
+      console.log(`Failed to get user: ${error.message}`);
+      return;
+    }
+    //Calculate score
+    const baseScore = 100000;
+    const accuracy = user.attempts / (user.attempts + user.misses);
+    const duration = Date.now() - user.startTime;
+    const score = (baseScore - duration) * accuracy;
+    console.log({ score });
 
+    try {
       user = await prisma.user.update({
         where: { jwt: token },
         data: {
@@ -140,41 +143,50 @@ export const userFunctions = {
           },
         },
       });
+    } catch (error) {
+      console.log(`Failed to create score for user: ${error.message}`);
+    }
 
-      //Get top 3 scores
-      const topScores = await prisma.user.findMany({
+    let topScores;
+    //Get top 3 scores
+    try {
+      topScores = await prisma.score.findMany({
         orderBy: {
-          score: {
-            score: "desc",
-          },
+          score: "desc",
         },
         take: 3,
         select: {
-          initials: true,
-          score: {
+          score: true,
+          user: {
             select: {
-              score: true,
+              initials: true,
             },
           },
         },
       });
+    } catch (error) {
+      console.log(`Failed to get top scores: ${error.message}`);
+    }
 
+    let userRank;
+    try {
       //Get user rank
-      const userRank = await prisma.score.count({
+      userRank = await prisma.score.count({
         where: {
           score: {
-            gt: user.score,
+            gte: score,
           },
         },
       });
-
-      return {
-        userScore: user.score,
-        userRank: userRank,
-        topScores: topScores,
-      };
     } catch (error) {
-      console.log(error.message);
+      console.log(`Failed to get user rank: ${error.message}`);
     }
+
+    // console.log({ userScore: score, userRank, topScores });
+    return {
+      userScore: score,
+      userRank: userRank,
+      topScores: topScores,
+    };
   },
 };
