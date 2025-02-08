@@ -37,4 +37,8 @@ router.get("/scores", limiter, async (req, res) => {
   await controller.getScores(req, res);
 });
 
+router.post("/scores", limiter, async (req, res) => {
+  await controller.postScore(req, res);
+});
+
 export default router;

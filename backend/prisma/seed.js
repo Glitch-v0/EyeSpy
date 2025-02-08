@@ -99,9 +99,9 @@ async function main() {
 
   await prisma.score.createMany({
     data: [
-      { userId: userMap["GUD"], score: 100 },
-      { userId: userMap["LOL"], score: 200 },
-      { userId: userMap["WIN"], score: 300 },
+      { userId: userMap["GUD"], score: 25000 },
+      { userId: userMap["LOL"], score: 50000 },
+      { userId: userMap["WIN"], score: 75000 },
     ],
   });
 }

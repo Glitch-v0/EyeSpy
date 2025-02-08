@@ -79,26 +79,21 @@ const controller = {
     let { token, user } = await handleUserToken(
       req.headers.authorization.split(" ")[1]
     );
-    // console.log({ token, user });
 
-    // Compare guessed coordinates to db coordinates
+    // Ensure user is guessing on an actual picture
     const picture = await prisma.picture.findUnique({
       where: { name: req.params.name },
     });
-    // console.log({ picture: picture.coordinates });
     if (!picture) {
-      res.json("Picture not found");
+      return res.json("Picture not found");
     }
 
     const { xRange1, yRange1, xRange2, yRange2 } =
       coordinateUtils.gatherPictureCoordinates(picture.coordinates);
 
-    // console.log({ xRange1, yRange1, xRange2, yRange2 });
-
     const [userGuessX, userGuessY] = req.params.guessCoordinates
       .split("_")
       .map(Number);
-    // console.log({ userGuessX, userGuessY });
 
     //Check if coordinates are stored for one or two eyes
     const eyeCount = xRange2.length ? 2 : 1;
@@ -106,7 +101,6 @@ const controller = {
 
     let pictureIsFinished = false;
     let correctAttempt = false;
-    let scoreData = null;
     if (
       coordinateUtils.correctUserAttempt(
         userGuessX,
@@ -115,7 +109,6 @@ const controller = {
         yRange1
       )
     ) {
-      // console.log("Eye 1 is correct!");
       if (eyeCount === 1) {
         // Complete picture if only one eye
         const allCompletedPictures = await userFunctions.pictureComplete(
@@ -123,14 +116,12 @@ const controller = {
           picture.name,
           user.picturesComplete
         );
-        // console.log({ allCompletedPictures });
         if (
           allCompletedPictures &&
           allCompletedPictures.length === controller.pictureNames.length
         ) {
-          //Check for completing all pictures
-          // console.log("All pictures completed!");
-          scoreData = await userFunctions.allPicturesComplete(token);
+          await userFunctions.allPicturesComplete(token);
+          pictureIsFinished = true;
         } else {
           pictureIsFinished = true;
         }
@@ -145,9 +136,8 @@ const controller = {
             allCompletedPictures &&
             allCompletedPictures.length === controller.pictureNames.length
           ) {
-            //Check for completing all pictures
-            // console.log("All pictures completed!");
-            scoreData = await userFunctions.allPicturesComplete(token);
+            await userFunctions.allPicturesComplete(token);
+            pictureIsFinished = true;
           } else {
             pictureIsFinished = true;
           }
@@ -174,9 +164,8 @@ const controller = {
           allCompletedPictures &&
           allCompletedPictures.length === controller.pictureNames.length
         ) {
-          //Check for completing all pictures
-          // console.log("All pictures completed!");
-          scoreData = await userFunctions.allPicturesComplete(token);
+          await userFunctions.allPicturesComplete(token);
+          pictureIsFinished = true;
         } else {
           pictureIsFinished = true;
         }
@@ -188,7 +177,6 @@ const controller = {
         correctAttempt = true;
       }
     } else {
-      // console.log(Incorrect! Passing ${token} into incorrectAttempt);
       await userFunctions.incorrectAttempt(token);
     }
 
@@ -198,11 +186,14 @@ const controller = {
       finished: pictureIsFinished,
       correct: correctAttempt,
       token: token ? token : null,
-      scoreData: scoreData ? scoreData : null,
     });
   }),
-
-  getScores: asyncHandler(async (req, res) => {}),
+  getScores: asyncHandler(async (req, res) => {
+    await userFunctions.getScores(req, res);
+  }),
+  postScore: asyncHandler(async (req, res) => {
+    await userFunctions.postScore(req, res);
+  }),
 };
 
 export default controller;

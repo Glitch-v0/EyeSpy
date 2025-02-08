@@ -118,9 +118,12 @@ export const userFunctions = {
     }
     //Calculate score
     const baseScore = 100000;
-    const accuracy = user.attempts / (user.attempts + user.misses);
+    const accuracy = user.attempts / (user.attempts + user.misses * 0.25);
     const duration = Date.now() - user.startTime;
-    const score = (baseScore - duration) * accuracy;
+    let score = Math.round((baseScore - duration * 0.5) * accuracy);
+    if (score < 0) {
+      score = 0;
+    }
     console.log({ score });
 
     try {
@@ -146,6 +149,20 @@ export const userFunctions = {
     } catch (error) {
       console.log(`Failed to create score for user: ${error.message}`);
     }
+  },
+
+  getScores: async (req, res) => {
+    let token = req.headers.authorization.split(" ")[1];
+    let userScore = await prisma.user.findFirst({
+      where: { jwt: token },
+      select: {
+        score: {
+          select: {
+            score: true,
+          },
+        },
+      },
+    });
 
     let topScores;
     //Get top 3 scores
@@ -174,7 +191,7 @@ export const userFunctions = {
       userRank = await prisma.score.count({
         where: {
           score: {
-            gte: score,
+            gte: userScore.score.score,
           },
         },
       });
@@ -182,11 +199,33 @@ export const userFunctions = {
       console.log(`Failed to get user rank: ${error.message}`);
     }
 
-    // console.log({ userScore: score, userRank, topScores });
-    return {
-      userScore: score,
+    console.log({ userScore: userScore, userRank, topScores });
+    res.json({
+      userScore: userScore.score,
       userRank: userRank,
       topScores: topScores,
-    };
+    });
+  },
+  postScore: async (req, res) => {
+    let token = req.headers.authorization.split(" ")[1];
+    let initials = req.body.initials;
+
+    //Update user score with received initials
+    try {
+      await prisma.user.update({
+        where: { jwt: token },
+        data: {
+          initials: initials,
+          startTime: Date.now(),
+        },
+        select: {
+          score: true,
+        },
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      res.json({ error: error.message });
+    }
   },
 };
