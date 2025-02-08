@@ -1,7 +1,16 @@
+#root {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  place-items: center;
+  place-content: center;
+}
+
 body {
-  display: flex;
-  justify-content: center;
   background-color: #7e7e7e;
+  dialog {
+    color: #0d593d;
+  }
 }
 
 .clickMarker {
@@ -14,6 +23,86 @@ body {
   z-index: 9999;
 }
 
+#textNoticeContainer {
+  font-size: 1.5rem;
+  height: 100vh; /* Ensure it fills the entire viewport */
+  display: flex;
+  #textNotice {
+    padding: 2rem;
+    white-space: pre-line;
+    place-self: center;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    line-height: 3rem;
+
+    button {
+      place-self: center;
+      padding: 0.5rem;
+      margin: 1rem;
+      border: none;
+      background-color: #7cffce;
+      border: 2px dashed #0d593d;
+    }
+  }
+}
+
 #correctMarker {
   background-color: rgb(51, 245, 51);
+}
+
+table {
+  border: 1px solid #0d593d;
+  background-color: rgb(227, 227, 227);
+  padding: 1rem;
+  place-self: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+
+  text-align: end;
+  th {
+    border-bottom: 1px solid #0d593d;
+    padding: 1rem;
+  }
+}
+
+.finishText {
+  font-size: 2rem;
+  padding: 0.25rem;
+}
+
+#finishTextContainer {
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  background-color: rgb(227, 227, 227);
+  padding: 1rem;
+}
+
+input {
+  font-size: 1.5rem;
+}
+::placeholder {
+  color: #0d593d;
+  opacity: 0.75;
+  text-align: center;
+}
+
+#restart {
+  display: flex;
+  flex-direction: column;
+}
+
+#fullScreen {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+#fullScreen::after {
+  font-size: 2rem;
+  content: "\26F6";
 }

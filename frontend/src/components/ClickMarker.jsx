@@ -16,6 +16,11 @@ export default function ClickMarker({ originalPictureSize, nextPicture }) {
   useEffect(() => {
     const handleClick = async (event) => {
       const picture = document.getElementById("picture");
+      const clickMarker = document.getElementById("clickMarker");
+      const acceptableClicks = [picture, clickMarker];
+      // console.log(event.target);
+      if (!picture) return; // Don't count click for unloaded picture
+      if (!acceptableClicks.includes(event.target)) return; // Ignore clicks outside the picture or marker
 
       if (picture) {
         const [normalizedX, normalizedY] = normalizeCoordinates(
@@ -29,12 +34,6 @@ export default function ClickMarker({ originalPictureSize, nextPicture }) {
         clickMarker.style.display = "";
         let currentPictureAltText = document.getElementById("picture").alt;
 
-        // console.log(
-        //   `PictureX: ${pictureX}, PictureY: ${pictureY} from coordinates: ${event.clientX}, ${event.clientY}`
-        // );
-        // console.log(
-        //   `SentCoordinates X: ${normalizedX}, Y: ${normalizedY}, converted from original picture size: ${originalPictureSize.width}, ${originalPictureSize.height}`
-        // );
         fetch(
           `${
             import.meta.env.VITE_API_URL

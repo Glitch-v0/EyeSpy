@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
+import propTypes from "prop-types";
 import { cleanPhotoURL } from "../photoUtilities.js";
 import ClickMarker from "./ClickMarker.jsx";
 
-export default function PictureDisplay() {
+PictureDisplay.propTypes = {
+  setIndex: propTypes.func.isRequired,
+};
+
+export default function PictureDisplay({ setIndex }) {
   const [allPictureData, setAllPictureData] = useState([]);
   const [pictureData, setPictureData] = useState({});
-  const [correct, setCorrect] = useState(false);
 
   function nextPicture() {
     let currentIndex = pictureData.currentIndex;
+    if (currentIndex === allPictureData.length - 1) {
+      setIndex(2);
+      return;
+    }
     let newIndex = currentIndex + 1;
     let resolution = {
       width: allPictureData[newIndex].width,
@@ -55,7 +63,7 @@ export default function PictureDisplay() {
   }, []);
 
   return (
-    <div>
+    <div id="pictureDisplay">
       <img id="picture" src={pictureData.url} alt={pictureData.display_name} />
       <ClickMarker
         originalPictureSize={pictureData.originalResolution}
