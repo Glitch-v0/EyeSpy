@@ -22,13 +22,7 @@ export default function PictureDisplay({ setIndex }) {
       width: allPictureData[newIndex].width,
       height: allPictureData[newIndex].height,
     };
-    // console.log({
-    //   allPictureData,
-    //   currentIndex,
-    //   newIndex,
-    //   resolution,
-    //   display_name: allPictureData[newIndex].display_name.split("_")[0],
-    // });
+
     setPictureData({
       display_name: allPictureData[newIndex].display_name.split("_")[0],
       currentIndex: newIndex,

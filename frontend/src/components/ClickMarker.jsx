@@ -18,7 +18,6 @@ export default function ClickMarker({ originalPictureSize, nextPicture }) {
       const picture = document.getElementById("picture");
       const clickMarker = document.getElementById("clickMarker");
       const acceptableClicks = [picture, clickMarker];
-      // console.log(event.target);
       if (!picture) return; // Don't count click for unloaded picture
       if (!acceptableClicks.includes(event.target)) return; // Ignore clicks outside the picture or marker
 
@@ -51,7 +50,6 @@ export default function ClickMarker({ originalPictureSize, nextPicture }) {
               localStorage.setItem("token", data.token);
             }
             if (data.finished) {
-              // console.log("Calling nextPicture");
               const correctMarker = document.getElementById("correctMarker");
               correctMarker.style.display = "none";
 
