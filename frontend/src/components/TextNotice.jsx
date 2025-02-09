@@ -2,7 +2,7 @@ import propTypes from "prop-types";
 import { useState } from "react";
 
 TextNotice.propTypes = {
-  text: propTypes.string.isRequired,
+  text: propTypes.object.isRequired,
   setIndex: propTypes.func.isRequired,
 };
 
