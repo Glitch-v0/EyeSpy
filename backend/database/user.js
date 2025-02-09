@@ -210,13 +210,17 @@ export const userFunctions = {
     let token = req.headers.authorization.split(" ")[1];
     let initials = req.body.initials;
 
+    console.log({ token, initials });
+    console.log(typeof initials, initials);
+
     //Update user score with received initials
+    let test;
     try {
-      await prisma.user.update({
+      test = await prisma.user.update({
         where: { jwt: token },
         data: {
           initials: initials,
-          startTime: Date.now(),
+          startTime: new Date(),
         },
         select: {
           score: true,
@@ -227,5 +231,6 @@ export const userFunctions = {
     } catch (error) {
       res.json({ error: error.message });
     }
+    console.log({ test });
   },
 };
