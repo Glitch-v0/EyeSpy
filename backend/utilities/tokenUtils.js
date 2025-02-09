@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { userFunctions } from "../database/user.js";
+import crypto from "crypto";
 
 export function createOrRefreshToken(userId) {
   return jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
