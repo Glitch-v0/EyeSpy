@@ -32,6 +32,8 @@ export default function PictureDisplay({ setIndex }) {
   }
 
   useEffect(() => {
+    console.log("Loading component...");
+    console.log("API URL:", import.meta.env.VITE_API_URL);
     fetch(`${import.meta.env.VITE_API_URL}/pictures`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,

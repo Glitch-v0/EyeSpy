@@ -30,13 +30,14 @@ export default function ScoreScreen() {
   }, []);
 
   const sendInitials = (initials) => {
+    console.log({ initials });
     fetch(`${import.meta.env.VITE_API_URL}/scores`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ initials: initials }),
+      body: JSON.stringify({ initials }),
     })
       .then((response) => {
         if (!response.ok) {
