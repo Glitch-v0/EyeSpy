@@ -3,7 +3,10 @@ import controller from "./controller.js";
 
 const router = express.Router();
 
-//get all app pictures from cloudinary
+router.get("/", async (req, res) => {
+  //Ping route response
+  res.json("pong");
+});
 router.get("/pictures", async (req, res) => {
   await controller.sendAllPictureData(req, res);
 });
